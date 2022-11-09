@@ -61,7 +61,38 @@ return (
 
 function Chat(){
 console.log(auth)
-return (<h1> Chatroom</h1>)
+return (
+<>
+<main class='chatroom'>
+
+<Message message="Mon premier message" />
+
+</main>
+
+<form>
+
+<input type='text' placeholder='Say Hi!'/>
+<button type='submt'> Send </button>
+</form>
+
+</>
+
+)
 
 }
+
+
+function Message(props) {
+return (
+  <>
+  <div>
+    <img alt="Avatar" src="https://avatars.dicebear.com/4.5/api/human/reyact-chat.svg?w=96&h=96"></img>
+    <p> {props.message}</p>
+  </div>
+  </>
+
+)
+}
+
+
 export default App
