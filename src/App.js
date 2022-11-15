@@ -4,7 +4,10 @@ import firebaseConfig from './private.js';
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import {useAuthState} from 'react-firebase-hooks/auth'
+import {useCollectionData} from 'react-firebase-hooks/firestore'
 import {getAuth, GoogleAuthProvider, signInWithPopup, signOut} from 'firebase/auth';
+import {collection, getFirestore, orderBy, query} from 'firebase/firestore'
+import { useEffect } from 'react';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -13,6 +16,7 @@ import {getAuth, GoogleAuthProvider, signInWithPopup, signOut} from 'firebase/au
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const firestore = getFirestore(app)
 // const analytics = getAnalytics(app);
 
 
@@ -60,13 +64,25 @@ return (
 
 
 function Chat(){
-console.log(auth)
+const msgCollection = collection(firestore, "messages")
+const q = query(msgCollection, orderBy('timestamp'))
+
+const [messages] = useCollectionData(q)
+
+useEffect(() => {
+  console.log('messages', messages)
+},[messages])
+
+
+
 return (
 <>
-<main class='chatroom'>
-
-<Message message="Mon premier message" />
-
+<main className='chatroom'>
+{ messages && messages.map(msg => (
+  <li>
+  <Message key ={msg.timestamp} message = {msg}/>
+  </li>
+))}
 </main>
 
 <form>
@@ -83,11 +99,15 @@ return (
 
 
 function Message(props) {
+
+  const { text, avatar, userId} = props.message
+  const msgClass = userId === auth.currentUser.uid ? "message--sent" : "message--received"
+
 return (
   <>
-  <div>
-    <img alt="Avatar" src="https://avatars.dicebear.com/4.5/api/human/reyact-chat.svg?w=96&h=96"></img>
-    <p> {props.message}</p>
+  <div className= { `message ${msgClass}`}>
+    <img alt="Avatar" src={ avatar || "https://avatars.dicebear.com/4.5/api/human/reyact-chat.svg?w=96&h=96"}></img>
+    <p> {props.message.text}</p>
   </div>
   </>
 
