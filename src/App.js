@@ -6,8 +6,8 @@ import { initializeApp } from "firebase/app";
 import {useAuthState} from 'react-firebase-hooks/auth'
 import {useCollectionData} from 'react-firebase-hooks/firestore'
 import {getAuth, GoogleAuthProvider, signInWithPopup, signOut} from 'firebase/auth';
-import {collection, getFirestore, orderBy, query} from 'firebase/firestore'
-import { useEffect } from 'react';
+import {addDoc, collection, getFirestore, orderBy, query} from 'firebase/firestore'
+import { useEffect, useState } from 'react';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -69,11 +69,25 @@ const q = query(msgCollection, orderBy('timestamp'))
 
 const [messages] = useCollectionData(q)
 
+const [myMessage, setMyMessage] = useState("")
+
 useEffect(() => {
   console.log('messages', messages)
 },[messages])
 
+const sendMessage = (event) => {
+  event.preventDefault()
+  
+  const currentUser = auth.currentUser
 
+  addDoc(msgCollection, {
+    text: myMessage,
+    timestamp: Date.now(),
+    userId: currentUser.uid,
+    avatar: currentUser.photoURL
+
+  })
+}
 
 return (
 <>
@@ -85,9 +99,10 @@ return (
 ))}
 </main>
 
-<form>
+<form onSubmit={sendMessage}>
 
-<input type='text' placeholder='Say Hi!'/>
+<input type='text' placeholder='Say Hi!' 
+  value={myMessage} onChange={e => setMyMessage(e.target.value)} />
 <button type='submt'> Send </button>
 </form>
 
